@@ -6,6 +6,7 @@ use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\KelompokCoaController;
 use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\PembelianController;
+use App\Http\Controllers\PengeluaranController;
 use App\Http\Controllers\PenjualanController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\SupplierController;
@@ -96,4 +97,14 @@ Route::prefix('/pembelian')->group(function () {
     Route::get('/detailPembelian/{id}', [PembelianController::class, 'detailPembelian']);
     Route::get('/dibayarkan/{id}', [PembelianController::class, 'dibayarkan']);
     Route::get('/dibatalkan/{id}', [PembelianController::class, 'dibatalkan']);
+});
+
+Route::prefix('/pengeluaran')->group(function () {
+    Route::get('/', [PengeluaranController::class, 'pengeluaran']);
+    Route::get('/createPengeluaran', [PengeluaranController::class, 'viewCreatePengeluaran']);
+    Route::post('/storePengeluaran', [PengeluaranController::class, 'storePengeluaran']);
+    Route::get('/getPengeluaran/{id}', [PengeluaranController::class, 'getPengeluaran']);
+    Route::get('/selesai/{id}', [PengeluaranController::class, 'selesai']);
+    Route::get('/hapus/{id}', [PengeluaranController::class, 'hapus']);
+    Route::get('/editPengeluaran/{id}', [PengeluaranController::class, 'viewEditPengeluaran']);
 });
