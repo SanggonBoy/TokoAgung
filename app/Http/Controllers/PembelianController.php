@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\coa;
+use App\Models\jurnal_umum;
 use App\Models\kategori;
 use App\Models\pembelian;
 use App\Models\pembelian_detail;
 use App\Models\produk;
 use App\Models\supplier;
+use App\Models\transaksi;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -14,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 
 class PembelianController extends Controller
 {
+    public $totalHargaPembelian;
     public function pembelian()
     {
         $pembelian = pembelian_detail::with(['pembelian', 'produk'])->get();
@@ -114,6 +118,8 @@ class PembelianController extends Controller
             'total_harga' => $totalHarga,
         ]);
 
+        $this->totalHargaPembelian = $pembelianStore->total_harga;
+
         pembelian_detail::create([
             'kode_pembelian' => $pembelianStore->id,
             'nama_produk' => $produkStore->id,
@@ -212,25 +218,67 @@ class PembelianController extends Controller
             return back()->with('error', 'Data Tidak Valid');
         }
 
-        $pembelian = pembelian::find($decryptedId);
-        if (!$pembelian) {
-            return back()->with('error', 'Pembelian tidak ditemukan');
-        }
-
-        if ($pembelian->status === 'Dibayar') {
-            return back()->with('error', 'Pembelian sudah dibayar sebelumnya.');
-        }
-
         DB::beginTransaction();
         try {
+            // Lock pembelian record untuk mencegah race condition
+            $pembelian = pembelian::lockForUpdate()->find($decryptedId);
+
+            if (!$pembelian) {
+                throw new \Exception('Pembelian tidak ditemukan');
+            }
+
+            if ($pembelian->status === 'Dibayar') {
+                throw new \Exception('Pembelian sudah dibayar sebelumnya.');
+            }
+
             $pembelian->status = 'Dibayar';
             $pembelian->save();
 
-            $pembelianDetail = Pembelian_detail::where('kode_pembelian', $pembelian->id)->first();
-            $produk = produk::find($pembelianDetail->nama_produk);
+            // Ambil semua detail pembelian dengan produk terkait
+            $pembelianDetails = Pembelian_detail::with('produk')
+                ->where('kode_pembelian', $pembelian->id)
+                ->get();
 
-            $produk->update([
-                'stok' => $produk->stok + $pembelianDetail->jumlah
+            // Validasi dan update stok
+            foreach ($pembelianDetails as $detail) {
+                if (!$detail->produk) {
+                    throw new \Exception('Produk tidak ditemukan');
+                }
+
+                $detail->produk->increment('stok', $detail->jumlah);
+            }
+
+            // Proses pencatatan transaksi
+            $kodeTransaksi = "TR-" . rand();
+            $transaksi = transaksi::create([
+                'kode_transaksi' => $kodeTransaksi,
+                'nama_transaksi' => 'Pembelian',
+                'total_harga' => $pembelian->total_harga, // Gunakan total dari pembelian
+                'tanggal' => now()
+            ]);
+
+            $persediaanBarangDagang = coa::where('kode_akun', '130')->first();
+            $kas = coa::where('kode_akun', '100')->first();
+
+            if (!$persediaanBarangDagang || !$kas) {
+                throw new \Exception('Akun COA tidak ditemukan');
+            }
+
+            // Pencatatan jurnal
+            jurnal_umum::create([
+                'coa' => $persediaanBarangDagang->id,
+                'transaksi' => $transaksi->id,
+                'akun' => $persediaanBarangDagang->nama_akun,
+                'debit' => $pembelian->total_harga,
+                'kredit' => 0,
+            ]);
+
+            jurnal_umum::create([
+                'coa' => $kas->id,
+                'transaksi' => $transaksi->id,
+                'akun' => $kas->nama_akun,
+                'debit' => 0,
+                'kredit' => $pembelian->total_harga,
             ]);
 
             DB::commit();
@@ -238,7 +286,7 @@ class PembelianController extends Controller
             return redirect('/pembelian')->with('success', 'Status pembelian berhasil dibayarkan.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Terjadi kesalahan saat memproses pembayaran.');
+            return back()->with('error', 'Gagal memproses pembayaran: ' . $e->getMessage());
         }
     }
 

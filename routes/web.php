@@ -2,8 +2,8 @@
 
 use App\Http\Controllers\CoaController;
 use App\Http\Controllers\dashboard;
+use App\Http\Controllers\JurnalUmumController;
 use App\Http\Controllers\KategoriController;
-use App\Http\Controllers\KelompokCoaController;
 use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\PembelianController;
 use App\Http\Controllers\PengeluaranController;
@@ -21,22 +21,23 @@ Route::get('/', function () {
 Route::get('/dashboard', [dashboard::class, 'dashboard']);
 
 // COA
-Route::prefix('/coa')->group(function () {
-    Route::get('/', [CoaController::class, 'coa']);
-    Route::get('/createCoa', [CoaController::class, 'viewCreateCoa']);
-    Route::post('/storeCoa', [CoaController::class, 'storeCoa']);
-    Route::get('/getCoa/{id}', [CoaController::class, 'getCoa']);
-    Route::post('/updateCoa/{id}', [CoaController::class, 'updateCoa']);
-});
+// Route::prefix('/coa')->group(function () {
+//     Route::get('/', [CoaController::class, 'coa']);
+//     Route::get('/createCoa', [CoaController::class, 'viewCreateCoa']);
+//     Route::post('/storeCoa', [CoaController::class, 'storeCoa']);
+//     Route::get('/getCoa/{id}', [CoaController::class, 'getCoa']);
+//     Route::post('/updateCoa/{id}', [CoaController::class, 'updateCoa']);
+// });
+Route::get('/coa', [CoaController::class, 'coa']);
 
 // KELOMPOK COA
-Route::prefix('/kelompokCoa')->group(function () {
-    Route::get('/', [KelompokCoaController::class, 'kelompokCoa']);
-    Route::get('/createKelompokCoa', [KelompokCoaController::class, 'viewCreateKelompokCoa']);
-    Route::post('/storeKelompokCoa', [KelompokCoaController::class, 'storeKelompokCoa']);
-    Route::get('/getKelompokCoa/{id}', [KelompokCoaController::class, 'getKelompokCoa']);
-    Route::post('/updateKelompokCoa/{id}', [KelompokCoaController::class, 'updateKelompokCoa']);
-});
+// Route::prefix('/kelompokCoa')->group(function () {
+//     Route::get('/', [KelompokCoaController::class, 'kelompokCoa']);
+//     Route::get('/createKelompokCoa', [KelompokCoaController::class, 'viewCreateKelompokCoa']);
+//     Route::post('/storeKelompokCoa', [KelompokCoaController::class, 'storeKelompokCoa']);
+//     Route::get('/getKelompokCoa/{id}', [KelompokCoaController::class, 'getKelompokCoa']);
+//     Route::post('/updateKelompokCoa/{id}', [KelompokCoaController::class, 'updateKelompokCoa']);
+// });
 
 // KATEGORI
 Route::prefix('/kategori')->group(function () {
@@ -107,4 +108,9 @@ Route::prefix('/pengeluaran')->group(function () {
     Route::get('/selesai/{id}', [PengeluaranController::class, 'selesai']);
     Route::get('/hapus/{id}', [PengeluaranController::class, 'hapus']);
     Route::get('/editPengeluaran/{id}', [PengeluaranController::class, 'viewEditPengeluaran']);
+});
+
+Route::prefix('/jurnalUmum')->group(function() {
+    Route::get('/', [JurnalUmumController::class, 'jurnalUmum']);
+    Route::get('/periodeJurnalUmum', [JurnalUmumController::class, 'periodeJurnalUmum']);
 });

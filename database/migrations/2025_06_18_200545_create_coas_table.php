@@ -15,9 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('kode_akun');
             $table->string('nama_akun');
-            $table->unsignedBigInteger('kelompok_akun');
-            $table->foreign('kelompok_akun')->references('id')->on('kelompok_coa')->onDelete('cascade');
-            $table->string('posisi_d_c');
             $table->timestamps();
         });
     }

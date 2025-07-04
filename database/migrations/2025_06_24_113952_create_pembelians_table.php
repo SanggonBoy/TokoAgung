@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('total_item');
             $table->string('total_harga');
             $table->string('diskon')->nullable();
+            $table->date('tanggal')->default(now());
             $table->string('status')->default('Belum Bayar');
             $table->timestamps();
         });

@@ -24,7 +24,7 @@
             <li class="nav-item mt-3">
                 <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Master Data</h6>
             </li>
-            <li class="nav-item">
+            {{-- <li class="nav-item">
                 <a class="nav-link {{ request()->is('kelompokCoa*') ? 'active' : '' }}" href="/kelompokCoa">
                     <div
                         class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
@@ -32,7 +32,7 @@
                     </div>
                     <span class="nav-link-text ms-1">Kelompok COA</span>
                 </a>
-            </li>
+            </li> --}}
             <li class="nav-item">
                 <a class="nav-link {{ request()->is('coa*') ? 'active' : '' }}" href="/coa">
                     <div
@@ -106,6 +106,18 @@
                         <i class="fa fa-book {{ request()->is('pengeluaran*') ? 'text-white' : 'text-muted' }}"></i>
                     </div>
                     <span class="nav-link-text ms-1">Pengeluaran</span>
+                </a>
+            </li>
+            <li class="nav-item mt-3">
+                <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Laporan</h6>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->is('jurnalUmum*') ? 'active' : '' }}" href="/jurnalUmum">
+                    <div
+                        class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                        <i class="fa fa-book {{ request()->is('jurnalUmum*') ? 'text-white' : 'text-muted' }}"></i>
+                    </div>
+                    <span class="nav-link-text ms-1">Jurnal Umum</span>
                 </a>
             </li>
         </ul>
